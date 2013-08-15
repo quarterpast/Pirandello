@@ -1,4 +1,4 @@
-require! "./".Stream
+require! "./index.js".Stream
 
 rand-string = (n)->
 	[String.from-char-code Math.floor 256*Math.random! for til n].join ''
