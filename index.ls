@@ -46,3 +46,28 @@ export class Stream
 			-> dest.end! unless dest._isStdio or not options.end
 
 	to-string: -> "[object Stream]"
+
+	take: (n)->
+		taken = 0
+		Stream (next,end)~>
+			@generator do
+				(chunk)->
+					if taken < n
+						next chunk
+						taken++
+					else end!
+				-> if taken <= n then end!
+
+	drop: (n)->
+		dropped = 0
+		Stream (next,end)~>
+			@generator do
+				(chunk)->
+					if dropped >= n
+						next chunk
+					dropped++
+				end
+
+	to-charstream: ->
+		@chain (str)->
+			Stream.from-array str.split ''
