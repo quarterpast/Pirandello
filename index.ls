@@ -92,3 +92,25 @@ export class Stream
 
 	scan: ::scanl
 	scan1: ::scanl1
+
+	foldl: (acc,f)->
+		Stream (next,end)~>
+			@generator do
+				(chunk)-> acc := f acc,chunk
+				->
+					next acc
+					end!
+
+	foldl1: (f)->
+		Stream (next,end)~>
+			init = true
+			var acc
+			@generator do
+				(chunk)->
+					acc := if init
+						init := false
+						chunk
+					else f acc,chunk
+				->
+					next acc
+					end!
