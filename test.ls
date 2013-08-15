@@ -1,11 +1,11 @@
 require! "./".Stream
 
 rand-string = (n)->
-	[String.from-char-code Math.floor 256*Math.random! for to n].join ''
+	[String.from-char-code Math.floor 256*Math.random! for til n].join ''
 
 gen-strings = (l, f)->
 	for to 1000
-		strs = for to l => (rand-string 1000)
+		strs = for til l => (rand-string 1000)
 		f ...strs
 
 process.on \exit ->
@@ -18,6 +18,8 @@ fold = (i,f,a)->
 empty = (.length is 0)
 head = (.0)
 tail = (.slice 1)
+
+id = ->it
 
 assertions = 0
 success = 0
@@ -32,8 +34,8 @@ eq = (a,b)->
 
 	ended = false
 	end = ->
-		at = (fold "" (++), as)
-		bt = (fold "" (++), bs)
+		at = (fold "" (+), as)
+		bt = (fold "" (+), bs)
 		if ended
 			try
 				console.assert at is bt
@@ -84,3 +86,41 @@ gen-strings 1 (a)->
 	sts = Stream.of a.slice n
 
 	sts `eq` sta
+
+
+gen-strings 1 (a)->
+	sta = Stream.of a
+
+	(sta.chain Stream.of) `eq` sta
+
+gen-strings 1 (a)->
+	f = (a)-> Stream.of a.length
+
+	(Stream.of a .chain f) `eq` f a
+
+gen-strings 1 (a)->
+	f = (a)-> Stream.of a.length
+	g = (b)-> Stream.of a * 10
+
+	sta = Stream.of a
+
+	(sta.chain f .chain g) `eq` (sta.chain (x)-> (f x).chain g)
+
+gen-strings 1 (a)->
+	sta = Stream.of a
+	(Stream.of id .ap sta) `eq` sta
+
+gen-strings 1 (a)->
+	u = Stream.of (a)-> a.length
+	v = Stream.of (b)-> a * 10
+	w = Stream.of a
+
+	(Stream.of (<<) .ap u .ap v .ap w) `eq` u.ap (v.ap w)
+
+gen-strings 1 (a)->
+	f = (a)-> a.length
+	(Stream.of f .ap Stream.of a) `eq` Stream.of f a
+
+gen-strings 1 (a)->
+	u = Stream.of (a)-> a.length
+	(u.ap Stream.of a) `eq` (Stream.of (<| a) .ap u)
