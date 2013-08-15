@@ -10,6 +10,7 @@ gen-strings = (l, f)->
 
 process.on \exit ->
 	console.log "#assertions assertions, #fail failures, #error errors"
+	process.exit 1 if error or fail
 
 fold = (i,f,a)->
 	| empty a   => i
