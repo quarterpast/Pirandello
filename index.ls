@@ -38,7 +38,7 @@ export class Stream
 			arr.for-each next
 			end!
 
-	@empty = ->Stream.of!
+	@empty = -> Stream.of!
 
 	pipe: (dest, options = {end:true})->
 		@generator do
@@ -71,3 +71,24 @@ export class Stream
 	to-charstream: ->
 		@chain (str)->
 			Stream.from-array str.split ''
+
+	scanl: (acc, f)->
+		Stream (next,end)~>
+			@generator do
+				(chunk)-> next acc := f acc,chunk
+				end
+
+	scanl1: (f)->
+		Stream (next,end)~>
+			init = true
+			var acc
+			@generator do
+				(chunk)->
+					acc := if init
+						init = false
+						chunk
+					else f acc,chunk
+				end
+
+	scan: ::scanl
+	scan1: ::scanl1
