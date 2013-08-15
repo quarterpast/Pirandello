@@ -117,3 +117,7 @@ export class Stream
 
 	fold: ::foldl
 	fold1: ::foldl1
+
+	length: ->
+		@map -> 1
+		.foldl 0,(+)
