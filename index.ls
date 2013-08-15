@@ -84,8 +84,8 @@ export class Stream
 			var acc
 			@generator do
 				(chunk)->
-					acc := if init
-						init = false
+					next acc := if init
+						init := false
 						chunk
 					else f acc,chunk
 				end
