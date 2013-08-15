@@ -114,3 +114,7 @@ export class Stream
 				->
 					next acc
 					end!
+
+
+	fold: ::foldl
+	fold1: ::foldl1
