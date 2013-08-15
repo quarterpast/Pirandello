@@ -10,9 +10,10 @@ export class Stream
 
 	#chain :: Stream a -> (a -> Stream b) -> Steam b
 	chain: (f)->
-		Stream (next)~>
-			@generator (chunk)~>
-				(f chunk).generator next
+		Stream (next,end)~>
+			@generator do
+				(chunk)~> (f chunk).generator next, (->)
+				end
 
 	#ap :: Stream (a -> b) -> Stream a -> Stream b
 	ap: (o)->
@@ -20,37 +21,33 @@ export class Stream
 			o.map f
 
 	# concat :: Stream a -> Stream a -> Stream a
-	concat: (o)->
-		Stream (next)~>
-			@generator (chunk)->
-				console.log chunk
-				if chunk?
-					next that
-				else
-					o.generator next
+	concat: (other)->
+		Stream (next,end)~>
+			@generator next, -> other.generator next, end
 
 	@from-readable = (readable)->
-		Stream (next)->
+		Stream (next, end)->
 			readable.on \data next
-			readable.on \end -> next null
+			readable.on \end  end
 
 	@of = (obj)->
-		Stream (next)->
+		Stream (next,end)->
 			next obj if obj?
-			next null
+			end!
 
 	@from-array = (arr)->
-		Stream (`each` arr)
+		Stream (next,end)->
+			each next,arr
+			end!
 
-	@empty = ->
-		Stream.of!
+	@empty = ->Stream.of!
 
 	to-readable: ->
 		out = new process.EventEmitter
-		@generator (chunk)->
-			if chunk?
-				out.emit \data that
-			else out.emit \end
+		#out.resume = ->
+		@generator do
+			(chunk)-> console.log chunk; out.emit \data chunk
+			-> out.emit \end
 
 		new Readable! .wrap out
 
