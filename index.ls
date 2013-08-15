@@ -1,5 +1,3 @@
-require! stream.Readable
-
 export class Stream
 	(@generator)~>
 
@@ -37,18 +35,14 @@ export class Stream
 
 	@from-array = (arr)->
 		Stream (next,end)->
-			each next,arr
+			arr.for-each next
 			end!
 
 	@empty = ->Stream.of!
 
-	to-readable: ->
-		out = new process.EventEmitter
-		#out.resume = ->
+	pipe: (dest, options = {end:true})->
 		@generator do
-			(chunk)-> console.log chunk; out.emit \data chunk
-			-> out.emit \end
-
-		new Readable! .wrap out
+			dest~write
+			-> dest.end! unless dest._isStdio or not options.end
 
 	to-string: -> "[object Stream]"
