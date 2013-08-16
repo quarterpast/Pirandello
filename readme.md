@@ -42,7 +42,7 @@ Stream.fromArray = function(arr) {
 ```
 
 ## Modifying
-Pirandello Streams are immutable; the methods below return a new stream. Streams are a [fantasy-land](https://github.com/puffnfresh.fantasy-land) MonadPlus.
+Pirandello Streams are immutable; the methods below return a new stream. Streams are a [fantasy-land](https://github.com/puffnfresh/fantasy-land) MonadPlus.
 
 ### ```Stream::concat```
 Returns a new stream that sends the contents of the current stream followed by the contents of the other stream.
