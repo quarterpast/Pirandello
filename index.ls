@@ -49,24 +49,15 @@ export class Stream
 
 	take: (n)->
 		taken = 0
-		Stream (next,end)~>
-			@generator do
-				(chunk)->
-					if taken < n
-						next chunk
-						taken++
-					else end!
-				-> if taken <= n then end!
+		@chain (chunk)->
+			| taken > n => Stream.empty!
+			| otherwise => taken++; Stream.of chunk
 
 	drop: (n)->
 		dropped = 0
-		Stream (next,end)~>
-			@generator do
-				(chunk)->
-					if dropped >= n
-						next chunk
-					dropped++
-				end
+		@chain (chunk)->
+			| dropped <= n => Stream.empty!
+			| otherwise    => dropped++; Stream.of chunk
 
 	to-charstream: ->
 		@chain (str)->
