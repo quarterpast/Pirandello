@@ -121,3 +121,7 @@ export class Stream
 	length: ->
 		@map -> 1
 		.foldl 0,(+)
+
+	zip-with-index: ->
+		i = 0
+		@map (c)-> [c, i++]

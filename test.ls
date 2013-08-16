@@ -101,7 +101,7 @@ gen-strings 1 (a)->
 
 gen-strings 1 (a)->
 	f = (a)-> Stream.of a.length
-	g = (b)-> Stream.of a * 10
+	g = (b)-> Stream.of b * 10
 
 	sta = Stream.of a
 
@@ -125,3 +125,14 @@ gen-strings 1 (a)->
 gen-strings 1 (a)->
 	u = Stream.of (a)-> a.length
 	(u.ap Stream.of a) `eq` (Stream.of (<| a) .ap u)
+
+gen-strings 1 (a)->
+	u = Stream.of a
+	(u.map id) `eq` u
+
+gen-strings 1 (a)->
+	f = (a)-> a.length
+	g = (b)-> b * 10
+	u = Stream.of a
+
+	(u.map g . f) `eq` (u.map f).map g
