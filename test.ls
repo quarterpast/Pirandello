@@ -19,6 +19,12 @@ fold = (i,f,a)->
 empty = (.length is 0)
 head = (.0)
 tail = (.slice 1)
+drop-until = (f,a)-->
+	| f head a  => a
+	| otherwise => drop-until f, tail a
+unlines = (.join "\n")
+lines = (.split "\n")
+
 
 id = ->it
 
@@ -43,8 +49,10 @@ eq = (a,b)->
 				success++
 			catch e
 				if e.name == /AssertionError/
-					stack = (.join "\n") tail (e.stack.split "\n")
-					console.error "#{at.substr 0 10}… expected to be #{bt.substr 0 10}… #{stack}"
+					stack = e.stack |> lines |> drop-until (== /at eq/) |> unlines
+					console.error """"#{at.substr 0 10}"… expected to be "#{bt.substr 0 10}"…
+					#{stack}
+					"""
 					fail++
 				else
 					console.log e.stack
