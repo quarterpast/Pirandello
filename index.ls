@@ -50,14 +50,14 @@ export class Stream
 	take: (n)->
 		taken = 0
 		@chain (chunk)->
-			| taken > n => Stream.empty!
+			| taken >= n => Stream.empty!
 			| otherwise => taken++; Stream.of chunk
 
 	drop: (n)->
 		dropped = 0
 		@chain (chunk)->
-			| dropped <= n => Stream.empty!
-			| otherwise    => dropped++; Stream.of chunk
+			| dropped < n => dropped++; Stream.empty!
+			| otherwise    => Stream.of chunk
 
 	to-charstream: ->
 		@chain (str)->
