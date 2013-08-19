@@ -42,7 +42,10 @@ export class Stream
 
 	pipe: (dest, options = {end:true})->
 		@generator do
-			-> dest.write it
+			(chunk)->
+				do function write
+					unless dest.write chunk
+						dest.once \drain write
 			-> dest.end! unless dest._isStdio or not options.end
 
 	to-string: -> "[object Stream]"
