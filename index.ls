@@ -42,7 +42,7 @@ export class Stream
 
 	pipe: (dest, options = {end:true})->
 		@generator do
-			dest~write
+			-> dest.write it
 			-> dest.end! unless dest._isStdio or not options.end
 
 	to-string: -> "[object Stream]"

@@ -35,6 +35,19 @@ success = 0
 fail = 0
 error = 0
 
+log-assert-or-exception = (e)->
+	if e.name == /AssertionError/
+		stack = e.stack |> lines |> drop-until (== /at eq/) |> unlines
+		console.error """"#{at.substr 0 10}"… expected to be "#{bt.substr 0 10}"…
+		#{stack}
+		"""
+		fail++
+	else
+		console.log e.stack
+		error++
+
+	return e
+
 class AssertStream extends Writable
 	idx: 0
 	(@test)-> super!
@@ -46,9 +59,8 @@ class AssertStream extends Writable
 				"#chunk expected to be #{@test[@idx++]}"
 			success++
 			null
-		catch =>
-			fail++
-			e
+		catch
+			log-assert-or-exception e
 
 class SlowAssertStream extends AssertStream
 	high-water-mark: 500
@@ -72,16 +84,8 @@ eq = (a,b)->
 			try
 				console.assert at is bt
 				success++
-			catch e
-				if e.name == /AssertionError/
-					stack = e.stack |> lines |> drop-until (== /at eq/) |> unlines
-					console.error """"#{at.substr 0 10}"… expected to be "#{bt.substr 0 10}"…
-					#{stack}
-					"""
-					fail++
-				else
-					console.log e.stack
-					error++
+			catch
+				log-assert-or-exception e
 		else ended := true
 
 	a.generator as~push, end
