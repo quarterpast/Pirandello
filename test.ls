@@ -1,4 +1,7 @@
-require! "./index.js".Stream
+require! {
+	"./index.js".Stream
+	stream.Writable
+}
 
 rand-string = (n)->
 	[String.from-char-code Math.floor 256*Math.random! for til n].join ''
@@ -25,13 +28,27 @@ drop-until = (f,a)-->
 unlines = (.join "\n")
 lines = (.split "\n")
 
-
 id = ->it
 
 assertions = 0
 success = 0
 fail = 0
 error = 0
+
+class AssertStream extends Writable
+	idx: 0
+	(@test)-> super!
+	_write: (chunk, encoding, callback)->
+		assertions++
+		callback try
+			console.assert do
+				(chunk.to-string encoding) is (@test[@idx].to-string encoding)
+				"#chunk expected to be #{@test[@idx++]}"
+			success++
+			null
+		catch =>
+			fail++
+			e
 
 eq = (a,b)->
 	as = []
@@ -145,3 +162,8 @@ gen-strings 1, :functor-composition (a)->
 	u = Stream.of a
 
 	(u.map g . f) `eq` (u.map f).map g
+
+gen-strings 1, :pipe (a)->
+	sta = Stream.of a .to-charstream!
+
+	sta.pipe new AssertStream a
