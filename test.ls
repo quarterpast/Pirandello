@@ -50,6 +50,14 @@ class AssertStream extends Writable
 			fail++
 			e
 
+class SlowAssertStream extends AssertStream
+	high-water-mark: 500
+	_write: (chunk, encoding, callback)->
+		super chunk, encoding, (...args)->
+			set-timeout ->
+				callback ...args
+			, Math.random! * 10
+
 eq = (a,b)->
 	as = []
 	bs = []
@@ -167,3 +175,8 @@ gen-strings 1, :pipe (a)->
 	sta = Stream.of a .to-charstream!
 
 	sta.pipe new AssertStream a
+
+gen-strings 50, :slow-pipe (...arr)->
+	sta = Stream.from-array arr
+
+	sta.pipe new SlowAssertStream arr
