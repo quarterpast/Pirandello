@@ -47,6 +47,7 @@ export class Stream
 					unless dest.write chunk
 						dest.once \drain write
 			-> dest.end! unless dest._isStdio or not options.end
+		return dest
 
 	to-string: -> "[object Stream]"
 
