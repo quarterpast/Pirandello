@@ -64,6 +64,9 @@ class AssertStream extends Writable
 
 class SlowAssertStream extends AssertStream
 	high-water-mark: 500
+	->
+		super ...
+		@set-max-listeners Infinity
 	_write: (chunk, encoding, callback)->
 		super chunk, encoding, (...args)->
 			set-timeout ->
