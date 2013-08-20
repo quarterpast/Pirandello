@@ -75,6 +75,9 @@ class AssertStream extends Writable
 
 class SlowAssertStream extends AssertStream
 	high-water-mark: 500
+	->
+		super ...
+		@set-max-listeners Infinity
 	_write: (chunk, encoding, callback)->
 		super chunk, encoding, (...args)->
 			set-timeout ->
@@ -195,12 +198,3 @@ gen-strings 50, :slow-pipe (...arr)->
 	sta = Stream.from-array arr
 
 	sta.pipe new SlowAssertStream arr
-
-do function pipe-returns-destination
-	src  = Stream.of "hello"
-	dest = new class extends Writable
-		_write: (void,void,callback)-> callback null
-
-	assert do
-		(r = src.pipe dest) is dest
-		"Expected #r to be #dest"
