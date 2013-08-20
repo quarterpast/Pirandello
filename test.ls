@@ -35,18 +35,29 @@ success = 0
 fail = 0
 error = 0
 
-log-assert-or-exception = (e)->
+log-assert-or-exception = (e, at, bt)->
 	if e.name == /AssertionError/
-		stack = e.stack |> lines |> drop-until (== /at eq/) |> unlines
-		console.error """"#{at.substr 0 10}"… expected to be "#{bt.substr 0 10}"…
-		#{stack}
-		"""
+		console.error if at?
+			stack = e.stack |> lines |> drop-until (== /at eq/) |> unlines
+			""""#{at.substr 0 10}"… expected to be "#{bt.substr 0 10}"…
+			#{stack}
+			"""
+		else e.stack
 		fail++
 	else
-		console.log e.stack
+		console.error e.stack
 		error++
 
 	return e
+
+assert = (cond,msg)->
+	assertions++
+	try
+		console.assert cond,msg
+		success++
+	catch =>
+		log-assert-or-exception e
+
 
 class AssertStream extends Writable
 	idx: 0
@@ -85,7 +96,7 @@ eq = (a,b)->
 				console.assert at is bt
 				success++
 			catch
-				log-assert-or-exception e
+				log-assert-or-exception e, at, bt
 		else ended := true
 
 	a.generator as~push, end
@@ -184,3 +195,12 @@ gen-strings 50, :slow-pipe (...arr)->
 	sta = Stream.from-array arr
 
 	sta.pipe new SlowAssertStream arr
+
+do function pipe-returns-destination
+	src  = Stream.of "hello"
+	dest = new class extends Writable
+		_write: (void,void,callback)-> callback null
+
+	assert do
+		(r = src.pipe dest) is dest
+		"Expected #r to be #dest"
