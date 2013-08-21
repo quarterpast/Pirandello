@@ -114,7 +114,7 @@ Stream.prototype.pipe = function(dest) {
 ```
 
 # Why?
-I [tried](https://github/quarterto/fantasy-streams) to make Readables look nice, I [really did](http://blog.153.io/post/58243405460/fantasy-streams). The API is ugly, and the abstraction is leaky. Here's to a fresh start.
+I [tried](https://github.com/quarterto/fantasy-streams) to make Readables look nice, I [really did](http://blog.153.io/post/58243405460/fantasy-streams). The API is ugly, and the abstraction is leaky. Here's to a fresh start.
 
 # Licence
 [MIT](licence.md)
