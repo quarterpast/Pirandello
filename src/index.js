@@ -1,20 +1,31 @@
-var Base = require('adt-simple').Base;
+var Extractor = require('adt-simple').Extractor;
 
 data Thunk {
 	thunk: *
-} deriving Base
+} deriving Extractor
 
 function force {
 	Thunk(a @ Function) => a()
 }
 
+/* @overrideapply */
 union Stream {
 	Nil,
 	Cons {
 		head: *,
 		tail: * // Thunk
 	}
-} deriving Base
+} deriving Extractor
+
+Nil.equals = function {
+	Nil  => true,
+	Cons => false
+}
+
+Cons.prototype.equals = function {
+	Nil => false,
+	Cons(a, s) => a === this.head && force(this.tail).equals(force(s))
+}
 
 operator $ 4 {$x} => #{ Thunk(function() { return $x }) }
 operator (::) 5 right {$l, $r} => #{Cons($l, $ $r)}
@@ -159,7 +170,7 @@ var methods = {
 	map: map,
 	ap: ap,
 	concat: concat,
-	toString: mkString,
+	mkString: mkString,
 	empty: empty
 };
 
@@ -168,16 +179,20 @@ for(var m in methods) { (function(m) {
 		(...args) => methods[m].apply(this, [this].concat(args))
 	}} (m));
 }
-Nil.isEqual = Cons.prototype.isEqual = Cons.prototype.equals;
 
-
+Nil.isEqual = Nil.equals;
+Cons.prototype.isEqual = Cons.prototype.equals;
 
 Stream.of = of;
 Stream.empty = empty;
 
-module.exports = function {
+Stream.fromString = fromString;
+Stream.fromList = fromList;
+
+Stream.apply = function {
 	x @ String => fromString(x),
 	x @ Array  => fromList(x),
 	x => of(x)
 };
 
+module.exports = Stream;
