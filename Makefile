@@ -6,10 +6,10 @@ lib/%.js: src/%.js
 	@mkdir -p ${@D}
 	node_modules/.bin/sjs $(SJS_OPTS) $< -o $@
 
-run: all
-	node --harmony-generators s.js
+test: all
+	node test.js
 
 clean:
 	rm -rf lib
 
-.PHONY: run clean
+.PHONY: test clean
