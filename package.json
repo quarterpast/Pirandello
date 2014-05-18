@@ -2,9 +2,15 @@
   "name": "pirandello",
   "version": "0.1.6",
   "devDependencies": {
-    "LiveScript": "~1.2.0"
+    "sparkler": "^0.2",
+    "sweet.js": "^0.6",
+    "lambda-chop": "^0.1.4"
   },
   "scripts": {
     "test": "make test"
+  },
+  "dependencies": {
+    "adt": "^0.7.2",
+    "lambda-chop": "^0.1.4"
   }
 }
