@@ -1,5 +1,16 @@
 var Extractor = require('adt-simple').Extractor;
 
+function γ(f){
+	return (function _curry(args) {
+		return function(){
+			var params = args ? args.concat() : [];
+			return params.push.apply(params, arguments) <
+					f.length && arguments.length ?
+				_curry.call(this, params) : f.apply(this, params);
+		};
+	}());
+}
+
 data Thunk {
 	thunk: *
 } deriving Extractor
@@ -110,13 +121,14 @@ function flatMap {
 	(*, Nil) => Nil
 }
 
-var map = λ f a -> flatMap((λ a -> of(f(a))), a);
+var map = γ(λ(a, f) -> flatMap((λ a -> of(f(a))), a));
 
-var ap = λ s a ->
+var ap = γ(λ(s, a) ->
 	flatMap(
 		λ f -> map(f)(a),
 		s
 	)
+);
 
 var head = λ s -> take(1, s);
 var tail = λ s -> drop(1, s);
