@@ -1,18 +1,20 @@
-newtype Thunk {
+var Base = require('adt-simple').Base;
+
+data Thunk {
 	thunk: *
-}
+} deriving Base
 
 function force {
 	Thunk(a @ Function) => a()
 }
 
-data Stream {
+union Stream {
 	Nil,
 	Cons {
 		head: *,
-		tail: Thunk
+		tail: * // Thunk
 	}
-};
+} deriving Base
 
 operator $ 4 {$x} => #{ Thunk(function() { return $x }) }
 operator (::) 5 right {$l, $r} => #{Cons($l, $ $r)}
@@ -83,6 +85,10 @@ function of(a) {
 	return a :: Nil;
 }
 
+function empty() {
+	return Nil;
+}
+
 function concat {
 	(Nil, b) => b,
 	(Cons(a,s), b) => a :: concat(force(s), b)
@@ -93,7 +99,7 @@ function flatMap {
 	(*, Nil) => Nil
 }
 
-var map = λ f a -> flatMap((λ a -> of(f(a))), a)
+var map = λ f a -> flatMap((λ a -> of(f(a))), a);
 
 var ap = λ s a ->
 	flatMap(
@@ -101,8 +107,8 @@ var ap = λ s a ->
 		s
 	)
 
-var head = λ s -> take(1, s)
-var tail = λ s -> drop(1, s)
+var head = λ s -> take(1, s);
+var tail = λ s -> drop(1, s);
 
 function toCharStream(s) {
 	return flatMap(
@@ -153,12 +159,25 @@ var methods = {
 	map: map,
 	ap: ap,
 	concat: concat,
-	toString: mkString
+	toString: mkString,
+	empty: empty
 };
 
-for(var m in methods) {
+for(var m in methods) { (function(m) {
 	Stream.prototype[m] = function {
 		(...args) => methods[m].apply(this, [this].concat(args))
-	}
+	}} (m));
 }
+Nil.isEqual = Cons.prototype.isEqual = Cons.prototype.equals;
+
+
+
+Stream.of = of;
+Stream.empty = empty;
+
+module.exports = function {
+	x @ String => fromString(x),
+	x @ Array  => fromList(x),
+	x => of(x)
+};
 

@@ -1,4 +1,4 @@
-SJS_OPTS = -m adt/macros -m sparkler/macros -m lambda-chop/macros -r
+SJS_OPTS = -m adt-simple/macros -m sparkler/macros -m lambda-chop/macros
 
 all: lib/index.js
 

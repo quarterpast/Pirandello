@@ -11,7 +11,6 @@
     "test": "make test"
   },
   "dependencies": {
-    "adt": "^0.7.2",
-    "lambda-chop": "^0.1.4"
+    "adt-simple": "^0.1.2"
   }
 }

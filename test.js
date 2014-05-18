@@ -1,17 +1,23 @@
 var laws = require('laws');
 var σ = require('./lib');
 
-[ laws.monoid      .leftIdentity
-, laws.monoid      .rightIdentity
-, laws.semigroup   .associativity
-, laws.functor     .identity
-, laws.functor     .composition
-, laws.applicative .identity
-, laws.applicative .composition
-, laws.applicative .homomorphism
-, laws.applicative .interchange
-, laws.chain       .associativity
-, laws.monad       .leftIdentity
-, laws.monad       .rightIdentity
-].forEach(function(l) { l(σ).asTest()() });
+[[ 'monoid'      , 'leftIdentity'  ]
+,[ 'monoid'      , 'rightIdentity' ]
+,[ 'semigroup'   , 'associativity' ]
+,[ 'functor'     , 'identity'      ]
+,[ 'functor'     , 'composition'   ]
+,[ 'applicative' , 'identity'      ]
+,[ 'applicative' , 'composition'   ]
+,[ 'applicative' , 'homomorphism'  ]
+,[ 'applicative' , 'interchange'   ]
+,[ 'chain'       , 'associativity' ]
+,[ 'monad'       , 'leftIdentity'  ]
+,[ 'monad'       , 'rightIdentity' ]
+].map(function(l) {
+	var test = laws[l[0]][l[1]](σ).asTest({verbose: true});
+	return function() {
+		console.log(l.join(' '));
+		test();
+	};
+}).forEach(function(t) { t() });
 
