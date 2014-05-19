@@ -178,6 +178,7 @@ var methods = {
 	mkString: mkString,
 	empty: empty,
 	take: flip(take),
+	drop: flip(drop),
 	isEqual: equals,
 	equals: equals,
 	eq: equals

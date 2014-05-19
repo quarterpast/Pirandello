@@ -27,4 +27,5 @@ function assert(a) {
 }
 
 [['take', function() { return σ('hello world').take(5).equals(σ('hello')); }]
+,['drop', function() { return σ('hello world').drop(6).equals(σ('world')); }]
 ].forEach(assert);
