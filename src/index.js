@@ -40,7 +40,7 @@ function equals {
 operator $ 4 {$x} => #{ Thunk(function() { return $x }) }
 operator (::) 5 right {$l, $r} => #{Cons($l, $ $r)}
 
-function foldr(k, z, s) {
+function foldr(s, k, z) {
 	function go {
 		Nil => z,
 		Cons(a, s) => k(a, go(force(s)))
@@ -49,12 +49,12 @@ function foldr(k, z, s) {
 	return go(s);
 }
 
-var mkString = λ a -> foldr(function(a, s) {
+var mkString = λ a -> foldr(a, function(a, s) {
 	return a + s
-}, "", a);
+}, "");
 
 function foldr1 {
-	(f, Cons(a, s)) => foldr1nonempty(a)(f)(force(s))
+	(Cons(a, s), f) => foldr1nonempty(a)(f)(force(s))
 }
 
 var foldr1nonempty = λ a f -> function {
@@ -88,19 +88,19 @@ var drop = γ(function drop {
 	(n, Cons(a, s)) => drop(n-1, force(s))
 });
 
-function takeStr {
+var takeStr = γ(function takeStr {
 	(0, *) => Nil,
 	(n, Nil) => Nil,
 	(n, Cons(a @ String, s)) if a.length < n => a :: takeStr(n-a.length, force(s)),
 	(n, Cons(a @ String, s)) if a.length >= n => a.slice(0, n) :: Nil
-}
+});
 
-function dropStr {
+var dropStr = γ(function dropStr {
 	(0, a) => a,
 	(n, Nil) => Nil,
 	(n, Cons(a @ String, s)) if a.length < n => dropStr(n-a.length, force(s)),
 	(n, Cons(a @ String, s)) if a.length >= n => a.slice(n) :: force(s)
-}
+});
 
 function of(a) {
 	return a :: Nil;
