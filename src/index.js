@@ -125,7 +125,7 @@ var map = γ(λ(a, f) -> flatMap((λ a -> of(f(a))), a));
 
 var ap = γ(λ(s, a) ->
 	flatMap(
-		λ f -> map(f)(a),
+		λ f -> map(a, f),
 		s
 	)
 );
@@ -183,8 +183,7 @@ var methods = {
 	ap: ap,
 	concat: concat,
 	mkString: mkString,
-	empty: empty,
-	of: of
+	empty: empty
 };
 
 for(var m in methods) { (function(m) {
@@ -192,6 +191,8 @@ for(var m in methods) { (function(m) {
 		(...args) => methods[m].apply(this, [this].concat(args))
 	}} (m));
 }
+
+Stream.prototype.of = of;
 
 Nil.isEqual = Nil.equals;
 Cons.prototype.isEqual = Cons.prototype.equals;
