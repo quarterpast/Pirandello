@@ -76,17 +76,17 @@ function pipe {
 	(Nil, dest) => dest.end()
 }
 
-function take {
+var take = γ(function take {
 	(0, *) => Nil,
 	(n, Nil) => Nil,
 	(n, Cons(a, s)) => a :: take(n-1, force(s))
-}
+});
 
-function drop {
+var drop = γ(function drop {
 	(0, a) => a,
 	(n, Nil) => Nil,
 	(n, Cons(a, s)) => drop(n-1, force(s))
-}
+});
 
 function takeStr {
 	(0, *) => Nil,
@@ -123,8 +123,8 @@ function flatMap {
 var map = γ(λ(s, f) -> flatMap(s, λ a -> of(f(a))));
 var ap  = γ(λ(s, a) -> flatMap(s, λ f -> map(a,f)));
 
-var head = λ s -> take(1, s);
-var tail = λ s -> drop(1, s);
+var head = take(1);
+var tail = drop(1);
 
 function toCharStream(s) {
 	return flatMap(
