@@ -183,7 +183,8 @@ var methods = {
 	ap: ap,
 	concat: concat,
 	mkString: mkString,
-	empty: empty
+	empty: empty,
+	of: of
 };
 
 for(var m in methods) { (function(m) {
@@ -201,10 +202,14 @@ Stream.empty = empty;
 Stream.fromString = fromString;
 Stream.fromList = fromList;
 
-Stream.apply = function {
+function apply {
 	x @ String => fromString(x),
 	x @ Array  => fromList(x),
 	x => of(x)
 };
+
+Stream.apply = function(ctx, args) {
+	return apply.apply(ctx, args);
+}
 
 module.exports = Stream;
