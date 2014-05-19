@@ -117,18 +117,12 @@ function concat {
 }
 
 function flatMap {
-	(f, Cons(a, s)) => concat(f(a), flatMap(f, force(s))),
-	(*, Nil) => Nil
+	(Cons(a, s), f) => concat(f(a), flatMap(force(s), f)),
+	(Nil) => Nil
 }
 
-var map = γ(λ(a, f) -> flatMap((λ a -> of(f(a))), a));
-
-var ap = γ(λ(s, a) ->
-	flatMap(
-		λ f -> map(a, f),
-		s
-	)
-);
+var map = γ(λ(s, f) -> flatMap(s, λ a -> of(f(a))));
+var ap  = γ(λ(s, a) -> flatMap(s, λ f -> map(a,f)));
 
 var head = λ s -> take(1, s);
 var tail = λ s -> drop(1, s);
@@ -137,7 +131,7 @@ function toCharStream(s) {
 	return flatMap(
 		λ c -> fromString(c),
 		s
-	)
+	);
 }
 
 function group(n, s) {
