@@ -21,3 +21,10 @@ var σ = require('./lib');
 	};
 }).forEach(function(t) { t() });
 
+function assert(a) {
+	console.assert(a[1](), a[0]);
+	console.log('👍  ' + a[0]);
+}
+
+[['take', function() { return σ('hello world').take(5).equals(σ('hello')); }]
+].forEach(assert);

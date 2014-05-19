@@ -11,6 +11,8 @@ function γ(f){
 	}());
 }
 
+var flip = γ(λ(f, a, b) -> f(b, a));
+
 data Thunk {
 	thunk: *
 } deriving Extractor
@@ -28,14 +30,11 @@ union Stream {
 	}
 } deriving Extractor
 
-Nil.equals = function {
-	Nil  => true,
-	Cons => false
-}
-
-Cons.prototype.equals = function {
-	Nil => false,
-	Cons(a, s) => a === this.head && force(this.tail).equals(force(s))
+function equals {
+	(Nil, Nil)  => true,
+	(Nil, Cons) => false,
+	(Cons, Nil) => false,
+	(Cons(a, s), Cons(b, t)) => a === b && equals(force(s), force(t))
 }
 
 operator $ 4 {$x} => #{ Thunk(function() { return $x }) }
@@ -177,7 +176,11 @@ var methods = {
 	ap: ap,
 	concat: concat,
 	mkString: mkString,
-	empty: empty
+	empty: empty,
+	take: flip(take),
+	isEqual: equals,
+	equals: equals,
+	eq: equals
 };
 
 for(var m in methods) { (function(m) {
@@ -187,10 +190,6 @@ for(var m in methods) { (function(m) {
 }
 
 Stream.prototype.of = of;
-
-Nil.isEqual = Nil.equals;
-Cons.prototype.isEqual = Cons.prototype.equals;
-
 Stream.of = of;
 Stream.empty = empty;
 
