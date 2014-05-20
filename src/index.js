@@ -2,16 +2,22 @@ var Extractor = require('adt-simple').Extractor;
 
 function γ(f){
 	return (function _curry(args) {
-		return function(){
+		function c(){
 			var params = args ? args.concat() : [];
 			return params.push.apply(params, arguments) <
 					f.length && arguments.length ?
 				_curry.call(this, params) : f.apply(this, params);
-		};
+		}
+
+		c.len = f.length;
+		return c;
 	}());
 }
 
+// flip :: (a → b → c) → (b → a → c)
 var flip = γ(λ(f, a, b) -> f(b, a));
+// flip3 :: (a → b → c → d) → (c → b → a → d)
+var flip3 = γ(λ(f, a, b, c) -> f(c, b, a));
 
 data Thunk {
 	thunk: *
@@ -40,22 +46,22 @@ function equals {
 operator $ 4 {$x} => #{ Thunk(function() { return $x }) }
 operator (::) 5 right {$l, $r} => #{Cons($l, $ $r)}
 
-function foldr(s, k, z) {
+var foldr = γ(function foldr(k, z, s) {
 	function go {
 		Nil => z,
 		Cons(a, s) => k(a, go(force(s)))
 	}
 
 	return go(s);
-}
+});
 
 var mkString = λ a -> foldr(a, function(a, s) {
 	return a + s
 }, "");
 
-function foldr1 {
-	(Cons(a, s), f) => foldr1nonempty(a)(f)(force(s))
-}
+var foldr1 = γ(function foldr1 {
+	(f, Cons(a, s)) => foldr1nonempty(a)(f)(force(s))
+});
 
 var foldr1nonempty = λ a f -> function {
 	Nil => a,
@@ -71,10 +77,10 @@ function fromString {
 	s @ String => fromList([].slice.call(s))
 }
 
-function pipe {
-	(Cons(a, s), dest) => dest.write(a); pipe(force(s), dest),
-	(Nil, dest) => dest.end()
-}
+var pipe = γ(function pipe {
+	(dest, Cons(a, s)) => dest.write(a); pipe(force(s), dest),
+	(dest, Nil) => dest.end()
+});
 
 var take = γ(function take {
 	(0, *) => Nil,
@@ -110,18 +116,18 @@ function empty() {
 	return Nil;
 }
 
-function concat {
+var concat = γ(function concat {
 	(Nil, b) => b,
 	(Cons(a,s), b) => a :: concat(force(s), b)
-}
+});
 
-function flatMap {
-	(Cons(a, s), f) => concat(f(a), flatMap(force(s), f)),
-	(Nil) => Nil
-}
+var flatMap = γ(function flatMap {
+	(f, Cons(a, s)) => concat(f(a), flatMap(f, force(s))),
+	(*, Nil) => Nil
+});
 
-var map = γ(λ(s, f) -> flatMap(s, λ a -> of(f(a))));
-var ap  = γ(λ(s, a) -> flatMap(s, λ f -> map(a,f)));
+var map = γ(λ(f, s) -> flatMap((λ a -> of(f(a))), s));
+var ap  = γ(λ(a, s) -> flatMap((λ f -> map(f,a)), s));
 
 var head = take(1);
 var tail = drop(1);
@@ -133,16 +139,16 @@ function toCharStream(s) {
 	);
 }
 
-function group(n, s) {
-	return mkString(take(n, s)) :: group(drop(n, s))
-}
+var group = γ(function group(n, s) {
+	return mkString(take(n, s)) :: group(n, drop(n, s))
+});
 
-function lengthCompare {
+var lengthCompare = γ(function lengthCompare {
 	("", Nil)  => 0,  // same length
 	(*,  Nil)  => 1,  // string is longer
 	("", Cons) => -1, // stream is longer
 	(x @ String, Cons(a,s)) => lengthCompare(x.slice(1), force(s))
-}
+});
 
 var repeat = λ x -> x :: repeat(x)
 var replicate = λ(n,x) -> take(n, repeat(x))
@@ -171,9 +177,9 @@ var sequence = λ M s -> foldr(
 );
 
 var methods = {
-	chain: flatMap,
-	map: map,
-	ap: ap,
+	chain: flip(flatMap),
+	map: flip(map),
+	ap: flip(ap),
 	concat: concat,
 	mkString: mkString,
 	empty: empty,
@@ -183,6 +189,7 @@ var methods = {
 	equals: equals,
 	eq: equals
 };
+
 
 for(var m in methods) { (function(m) {
 	Stream.prototype[m] = function {
