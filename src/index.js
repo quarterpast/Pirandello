@@ -55,9 +55,9 @@ var foldr = γ(function foldr(k, z, s) {
 	return go(s);
 });
 
-var mkString = λ a -> foldr(a, function(a, s) {
+var mkString = λ a -> foldr(function(a, s) {
 	return a + s
-}, "");
+}, "", a);
 
 var foldr1 = γ(function foldr1 {
 	(f, Cons(a, s)) => foldr1nonempty(a)(f)(force(s))
@@ -185,6 +185,8 @@ var methods = {
 	empty: empty,
 	take: flip(take),
 	drop: flip(drop),
+	takeStr: flip(takeStr),
+	dropStr: flip(dropStr),
 	isEqual: equals,
 	equals: equals,
 	eq: equals

@@ -6,7 +6,7 @@ lib/%.js: src/%.js
 	@mkdir -p ${@D}
 	node_modules/.bin/sjs $(SJS_OPTS) $< -o $@
 
-test: all
+test: all test.js
 	node test.js
 
 clean:
